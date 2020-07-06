@@ -2,18 +2,20 @@
 st.dev <- tapply(X = fish$parcel.start.lat,INDEX = fish$tow.depth,FUN = sd)
 data.frame(st.dev)
 stdev.p <- data.frame(st.dev)
-stdev.p$STDEV <- rownames(stdev.p)
+stdev.p$tow.depth <- rownames(stdev.p)
 stdev.p
 #creating dataframe for mean and renaming rows "MEAN
 mean <-tapply(X = fish$parcel.start.lat,INDEX = fish$tow.depth,FUN = mean)
 data.frame(mean)
 mean.p <- data.frame(mean)
-mean.p$MEAN<- rownames(mean.p)
+mean.p$tow.depth<- rownames(mean.p)
 mean.p
-#merging by STDEV and MEAN
-mean.stdev <- merge(x = stdev.p,y = mean.p,by.x = "STDEV",by.y = "MEAN")
+#joining stdev.p and mean.p
+mean.stdev <- inner_join(x = stdev.p,y = mean.p,"tow.depth")
+#reorganizing the columns
+mean.stdev <- mean.stdev[,c("tow.depth","st.dev","mean")]
 mean.stdev
-STDEV    st.dev     mean
-1     D 0.4379166 24.96947
-2     M 0.5495251 25.35131
-3     S 0.4882721 25.29146
+ tow.depth    st.dev     mean
+1         D 0.4379166 24.96947
+2         M 0.5495251 25.35131
+3         S 0.4882721 25.29146
