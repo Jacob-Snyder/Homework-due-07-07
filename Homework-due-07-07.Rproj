@@ -1,28 +1,19 @@
-names(fish)
-install.packages("tidyverse")
-library(tidyverse)
-minimum <- group_by(fish,region,zoo_type)
-minimum
-summarise(minimum,min.p=min(parcel.end.lat))
-summarise(minimum,max.p=max(parcel.end.lat),min.p=min(parcel.end.lat),med.p=median(parcel.end.lat))
-summarise(minimum, max.p=max(parcel.end.lat), min.p=min(parcel.end.lat),med.p=median(parcel.end.lat),lower95=quantile(x = parcel.end.lat,.95),upper95=quantile(x = parcel.end.lat,.05))
-# A tibble: 16 x 7
-# Groups:   region [16]
-region zoo_type max.p min.p med.p lower95 upper95
-<chr>  <chr>    <dbl> <dbl> <dbl>   <dbl>   <dbl>
-  1 10W    hzoo      24.4  24.3  24.4    24.4    24.3
-2 1E     hzoo      25.9  25.7  25.8    25.9    25.7
-3 1W     hzoo      25.9  25.7  25.9    25.9    25.7
-4 2C     hzoo      25.4  25.1  25.3    25.4    25.1
-5 2E     hzoo      25.2  25.1  25.1    25.2    25.1
-6 3C     hzoo      24.7  24.6  24.7    24.7    24.6
-7 3W     hzoo      25.2  24.9  25.1    25.2    25.0
-8 4W     hzoo      24.9  24.5  24.7    24.8    24.6
-9 5W     hzoo      24.5  24.3  24.4    24.5    24.4
-10 6E     hzoo      26.1  25.9  26.0    26.1    25.9
-11 6W     hzoo      26.2  25.8  26.2    26.2    25.8
-12 7C     hzoo      25.7  25.4  25.4    25.7    25.4
-13 7E     hzoo      25.3  25.2  25.2    25.3    25.2
-14 7W     hzoo      25.5  25.2  25.4    25.5    25.2
-15 8W     hzoo      24.9  24.8  24.9    24.9    24.8
-16 9W     hzoo      24.4  24.4  24.4    24.4    24.4
+#creating dataframe for standard deviation and renaming rows "STDEV"
+st.dev <- tapply(X = fish$parcel.start.lat,INDEX = fish$tow.depth,FUN = sd)
+data.frame(st.dev)
+stdev.p <- data.frame(st.dev)
+stdev.p$STDEV <- rownames(stdev.p)
+stdev.p
+#creating dataframe for mean and renaming rows "MEAN
+mean <-tapply(X = fish$parcel.start.lat,INDEX = fish$tow.depth,FUN = mean)
+data.frame(mean)
+mean.p <- data.frame(mean)
+mean.p$MEAN<- rownames(mean.p)
+mean.p
+#merging by STDEV and MEAN
+mean.stdev <- merge(x = stdev.p,y = mean.p,by.x = "STDEV",by.y = "MEAN")
+mean.stdev
+STDEV    st.dev     mean
+1     D 0.4379166 24.96947
+2     M 0.5495251 25.35131
+3     S 0.4882721 25.29146
