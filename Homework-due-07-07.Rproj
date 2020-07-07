@@ -1,40 +1,53 @@
-#USING GROUP_BY and SUMMARISE
-#checking for column names
-names(fish)
-#grouping by parcel.end/start.time and assigning function to "maximum"
-maximum <- group_by(fish,parcel.end.time,parcel.start.time)
-#summarise
-summarise(maximum,max.peo=max(parcel.end.lon),min.peo=min(parcel.end.lon),med.peo=median(parcel.end.lon),upper95.peo=quantile(parcel.end.lon,.05),lower95.peo=quantile(parcel.end.lon,.95))
+#GROUP_BY
+MMMMQ <- group_by(fish,type_fac,tow.depth)
 
 
-#USING MERGE
-#creating dataframe for maximum values
-max <- tapply(X = fish$parcel.end.time,INDEX = fish$parcel.end.lat,FUN = max)
-maximum<-data.frame(max)
-maximum$max.p <- rownames(maximum)
-#creating dataframe for miniumum values
-min <- tapply(X = fish$parcel.end.time,INDEX = fish$parcel.end.lat,FUN = min)
-minimum <- data.frame(min)
-minimum$min.p <- rownames(minimum)
-#merging by.x and by.y
-max.min <- merge(x = maximum,y = minimum,by.x = "max.p",by.y = "min.p")
-max.min
-              max.p        max        min
-1   24.3082333333333 1434998147 1434998147
-2   24.3117833333333 1434979478 1434979478
-3   24.3193239512518 1434976177 1434976177
+#SUMMARISE
+MMMMQ <- summarise(MMMMQ,min.DNE=min(avg.DNE.m), max.DNE=max(avg.DNE.m), med.DNE=median(avg.DNE.m), upper95.DNE=quantile(avg.DNE.m,.05), lower95.DNE=quantile(avg.DNE.m,.95))
+MMMMQ
+type_fac   tow.depth min.DNE max.DNE med.DNE upper95.DNE lower95.DNE
+<fct>      <chr>       <dbl>   <dbl>   <dbl>       <dbl>       <dbl>
+  1 Patch      D           2.74     89.0    24.3        9.87        53.8
+2 Patch      M           2.52    104.     22.2        9.43        57.9
+3 Patch      S           0.755    88.6    15.8        9.38        51.1
+4 Aggregated D          15.4     123.     29.6       17.2         59.9
+5 Aggregated M          15.7     166.     29.7       17.4         63.3
+6 Aggregated S          14.7      62.1    25.1       16.4         44.7
+7 Random     D          31.1     188.     64.4       53.7        125. 
+8 Random     M           0       206.     74.1       56.6        161. 
+9 Random     S           0       209.     67.0       53.1        177. 
+10 Zeros      D           0         0       0          0            0  
+11 Zeros      M           0         0       0          0            0  
+12 Zeros      S           0         0       0          0            0  
 
 
-#USING JOIN
-#renaming rownames to "parcel.end.lat"
-maximum <- rename(maximum,parcel.end.lat=max.p)
-minimum <- rename(minimum,parcel.end.lat=min.p)
-#joining max and min by parcel.end.lat
-max.min.ij <- inner_join(x = maximum,y = minimum,"parcel.end.lat")
-#reorganizing columns
-max.min.ij<-max.min.ij[,c("parcel.end.lat","max","min")]
-max.min.ij
-      parcel.end.lat        max        min
-1   24.3082333333333 1434998147 1434998147
-2   24.3117833333333 1434979478 1434979478
-3   24.3193239512518 1434976177 1434976177
+#MERGE
+med <- tapply(X = fish$avg.DNE.m,INDEX = fish$tow.depth,FUN = median)
+med2 <- data.frame(med)
+med2$median.DNE <- rownames(med2)
+mean <- tapply(X = fish$avg.DNE.m,INDEX = fish$tow.depth,FUN = mean)
+mean2 <- data.frame(mean)
+mean2$mean.DNE <- rownames(mean2)
+MED.MEAN <- merge(x = med2,y = mean2,by.x = "median.DNE",by.y = "mean.DNE")
+MED.MEAN
+  median.DNE      med     mean
+1          D 15.74908 19.72188
+2          M 15.18224 20.97564
+3          S 10.26625 14.82579
+
+
+#JOIN
+med2 <- rename(med2,tow.depth=median.DNE)
+mean2 <- rename(mean2,tow.depth=mean.DNE)
+table <- inner_join(x = med2,y = mean2,"tow.depth")
+med tow.depth     mean
+1 15.74908         D 19.72188
+2 15.18224         M 20.97564
+3 10.26625         S 14.82579
+#REORGANIZE
+table <- table[,c("tow.depth","med","mean")]
+table
+tow.depth      med     mean
+1         D 15.74908 19.72188
+2         M 15.18224 20.97564
+3         S 10.26625 14.82579
